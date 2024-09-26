@@ -1,0 +1,39 @@
+<!-- chat/templates/chat/index.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Real-Time Chat</title>
+  </head>
+  <body>
+    {% if user.is_authenticated %}
+    <p>Logged in as: {{ user.username }}</p>
+    <div id="chat">
+      <input type="text" id="messageInput" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+      <ul id="chatMessages"></ul>
+    </div>
+    <script>
+      const chatSocket = new WebSocket(
+        "ws://" + window.location.host + "/ws/chat/"
+      );
+
+      chatSocket.onmessage = function (event) {
+        const message = JSON.parse(event.data).message;
+        const ul = document.getElementById("chatMessages");
+        const li = document.createElement("li");
+        li.appendChild(document.createTextNode(message));
+        ul.appendChild(li);
+      };
+
+      function sendMessage() {
+        const messageInput = document.getElementById("messageInput");
+        const message = messageInput.value;
+        chatSocket.send(JSON.stringify({ message: message }));
+        messageInput.value = "";
+      }
+    </script>
+    {% else %}
+    <p>Please log in to use the chat.</p>
+    {% endif %}
+  </body>
+</html>
